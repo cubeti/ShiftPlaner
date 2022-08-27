@@ -1,0 +1,44 @@
+CREATE TABLE `users` (
+  `uid` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(50) NOT NULL,
+  `password` varchar(250) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `id_UNIQUE` (`uid`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `db`.`employees` (
+  `eid` INT NOT NULL AUTO_INCREMENT,
+  `lid` INT NOT NULL,
+  `wage` DOUBLE NOT NULL,
+  `preference` VARCHAR(45) NOT NULL,
+  `vacation` INT NOT NULL,
+  PRIMARY KEY (`eid`),
+  INDEX `locationemployee_idx` (`lid` ASC) VISIBLE,
+  CONSTRAINT `locationemployee`
+    FOREIGN KEY (`lid`)
+    REFERENCES `db`.`users` (`uid`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
+
+    CREATE TABLE `jobs` (
+      `jid` int NOT NULL AUTO_INCREMENT,
+      `lid` int DEFAULT NULL,
+      `nr_shifts_weekdays` int DEFAULT NULL,
+      `lenght_shifts_weekdays` int DEFAULT NULL,
+      `nr_shifts_weekend` int DEFAULT NULL,
+      `lenght_shifts_weekend` int DEFAULT NULL,
+      `min_people_shift1` int DEFAULT NULL,
+      `min_people_shift2` int DEFAULT NULL,
+      `min_people_shift3` int DEFAULT NULL,
+      `nr_weekdays` int DEFAULT NULL,
+      `nr_weekenddays` int DEFAULT NULL,
+      `title` varchar(100) DEFAULT NULL,
+      PRIMARY KEY (`jid`),
+      UNIQUE KEY `locationtitleindex` (`lid`,`title`),
+      KEY `lid_index` (`lid`),
+      CONSTRAINT `locationjob` FOREIGN KEY (`lid`) REFERENCES `users` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
