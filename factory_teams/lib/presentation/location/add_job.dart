@@ -1,4 +1,5 @@
 import 'package:factory_teams/providers/isar_providers.dart';
+import 'package:factory_teams/providers/service_providers.dart';
 import 'package:factory_teams/providers/sql_providers.dart';
 import 'package:factory_teams/services/widgets.dart';
 import 'package:flutter/material.dart';
@@ -16,38 +17,58 @@ class RegisterJob extends ConsumerStatefulWidget {
 }
 
 class _RegisterJobState extends ConsumerState<RegisterJob> {
-
-
+   int nrShiftsWeekday = 0;
+   int nrShiftsWeekend = 0;
+   int shiftsWeekdayLength = 0;
+   int shiftsWeekendLength = 0;
+   int minPeopleEvening = 0;
+  int minPeopleMorning = 0;
+  int minPeopleNight = 0;
+  String title = 'testjob';
+  int nrWeekdays = 0;
+  int nrWeekendDays = 0;
+  int start1 = 0;
+  int start2 = 0;
+  int start3 = 0;
   void updateNrShiftsWeekday(String s,WidgetRef ref){
-    ref.read(providerJobsNrShiftsWeekday.notifier).state = int.parse(s);
+    nrShiftsWeekday = int.parse(s);
   }
   void updateNrShiftsWeekend(String s,WidgetRef ref){
-    ref.read(providerJobsNrShiftsWeekend.notifier).state = int.parse(s);
+    nrShiftsWeekend = int.parse(s);
   }
   void updateShiftsWeekdayLength(String s,WidgetRef ref){
-    ref.read(providerJobsShiftsWeekdayLength.notifier).state =int.parse(s);
+    shiftsWeekdayLength = int.parse(s);
   }
   void updateShiftsWeekendLength(String s,WidgetRef ref){
-    ref.read(providerJobsShiftsWeekendLength.notifier).state =int.parse(s);
+    shiftsWeekendLength = int.parse(s);
   }
   void updateMinPeopleMorning(String s,WidgetRef ref){
-    ref.read(providerJobsMinPeopleMorning.notifier).state=int.parse(s);
+    minPeopleMorning = int.parse(s);
   }
   void updateMinPeopleEvening(String s,WidgetRef ref){
-    ref.read(providerJobsMinPeopleEvening.notifier).state=int.parse(s);
+    minPeopleEvening=int.parse(s);
   }
   void updateMinPeopleNight(String s,WidgetRef ref){
-    ref.read(providerJobsMinPeopleNight.notifier).state=int.parse(s);
+    minPeopleNight = int.parse(s);
   }
   void updateTitle(String s,WidgetRef ref){
-    ref.read(providerJobsTitle.notifier).state = s;
+    title = s;
   }
   void updateWeekdays(String s,WidgetRef ref){
-    ref.read(providerJobsNrWeekdays.notifier).state=int.parse(s);
+    nrWeekdays = int.parse(s);
   }
   void updateWeekends(String s,WidgetRef ref){
-    ref.read(providerJobsNrWeekends.notifier).state=int.parse(s);
+    nrWeekendDays = int.parse(s);
   }
+   void updateStart1(String s,WidgetRef ref){
+     start1 = int.parse(s);
+   }
+   void updateStart2(String s,WidgetRef ref){
+     start2 = int.parse(s);
+   }
+   void updateStart3(String s,WidgetRef ref){
+     start3 = int.parse(s);
+   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +92,10 @@ class _RegisterJobState extends ConsumerState<RegisterJob> {
               customTextField('Minimum people on a evening shift', updateMinPeopleEvening, false, TextInputType.number),
               customTextField('Minimum people on a night shift', updateMinPeopleNight, false, TextInputType.number),
               customTextField('How many workdays M-F/week', updateWeekdays, false, TextInputType.number),
-              customTextField('How many workdays Sa-Su/week', updateWeekends, false, TextInputType.number),
+              customTextField('How many workdays Sa-Su/month', updateWeekends, false, TextInputType.number),
+              customTextField('Start hour morning shift', updateStart1, false, TextInputType.number),
+              customTextField('Start hour evening shift', updateStart2, false, TextInputType.number),
+              customTextField('Start hour night shift', updateStart3, false, TextInputType.number),
 
 
               Container(
@@ -82,7 +106,22 @@ class _RegisterJobState extends ConsumerState<RegisterJob> {
                     borderRadius: BorderRadius.circular(15)),
                 child: ElevatedButton(
                   onPressed: () async {
-                    final value = await ref.read(providerSqlService).insertJob();
+                    final value = await ref.read(providerLocationServices).
+                    addJob(
+                        nrShiftsWeekday,
+                        nrShiftsWeekend,
+                        shiftsWeekdayLength,
+                        shiftsWeekendLength,
+                        minPeopleEvening,
+                        minPeopleMorning,
+                        minPeopleNight,
+                        title,
+                        nrWeekdays,
+                        nrWeekendDays,
+                        start1,
+                        start2,
+                        start3,
+                    );
                     if(value == -1) {
                       // ignore: use_build_context_synchronously
                       showMyDialog(context,"Error","SQL insert error");
@@ -91,6 +130,11 @@ class _RegisterJobState extends ConsumerState<RegisterJob> {
                       // ignore: use_build_context_synchronously
                       showMyDialog(context,"Error","Position already exists");
                     }
+                    else
+                      {
+                        if(!mounted) return;
+                        showMyDialog(context,"Success","Job $value added");
+                      }
                   },
                   child: const Text(
                     'Submit',

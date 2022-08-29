@@ -60,16 +60,3 @@ final providerInsertUser = FutureProvider<int>((ref) async {
   if(value == -1) return Future.error('error');
   return value;
 });
-final providerInsertEmployee = FutureProvider((ref) async {
-  final value = await ref.watch(providerSqlService).insertEmployee(
-      ref.watch(providerRegistrationEmail),
-      ref.watch(providerRegistrationPassword),
-      ref.watch(providerRegistrationName),
-      ref.watch(providerRegistrationWage),
-      ref.watch(providerRegistrationVacationDays),
-      ref.watch(providerRegistrationNorm),
-      ref.watch(providerRegistrationRole),
-      ref.watch(providerRegistrationPhone),
-      ref.watch(providerRegistrationUrl));
-  return value;
-});

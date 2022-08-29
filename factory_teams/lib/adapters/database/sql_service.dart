@@ -10,7 +10,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mysql_utils/mysql_utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../models/job.dart';
 import '../../providers/isar_providers.dart';
+import '../../providers/service_providers.dart';
 
 class SqlService {
 
@@ -34,7 +36,8 @@ class SqlService {
          ..password=row1['password']
          ..email=email
          ..name=row1['name']
-         ..role=row1['role'];
+         ..role=row1['role']
+         ..status=row1['status'];
 
   }
   Future<void> delete(int id)async{
@@ -60,69 +63,75 @@ class SqlService {
     print("Inserted $email,$name returned $value");
     return value;
   }
-  Future<int> insertEmployee(String email,String psw,String name,double wage,int days,int norm,String role,int phone,String url) async{
-    final _userId= await insertUser(email, name, psw,role);
-    if(_userId == -1) {
+  Future<List<int>> insertEmployee(String email,String psw,String name,double wage,int days,int norm,String role,String phone,String url,int jid) async{
+    final userId= await insertUser(email, name, psw,role);
+    if(userId == 0) {
       print('Error userId when insert employee');
-      return -1;
+      return [-1,-1];
     }
+
     final value = await _db.insert(table: 'employees', insertData: {
-      'lid': ref.read(providerLogInId),
+      'lid': ref.read(providerHiveService).getUser().id,
       'wage': wage,
       'vacation': days,
       'norm': norm,
-      'uid' : _userId,
-      'jobtitle': ref.read(providerRegistrationJob),
+      'uid' : userId,
+      'jid': jid,
       'phone': phone,
       'url': url,
-      'status': 'new'
     });
+    return [userId,value];
+  }
+  Future<int> insertJob(
+      int nrShiftsWeekday,
+      int nrShiftsWeekend, int shiftsWeekdayLength,
+      int shiftsWeekendLength, int minPeopleEvening,
+      int minPeopleMorning, int minPeopleNight,
+      String title, int nrWeekdays, int nrWeekendDays,
+      int timeShift1,int timeShift2,int timeShift3,int uid) async{
+    int value = 0;
+
+       value =await _db.insert(table: 'jobs', insertData: {
+         'lid': uid,
+         'title': title,
+         'nr_shifts_weekdays': nrShiftsWeekday,
+         'nr_shifts_weekend': nrShiftsWeekend,
+         'lenght_shifts_weekdays': shiftsWeekdayLength,
+         'lenght_shifts_weekend': shiftsWeekendLength,
+         'min_people_shift1': minPeopleMorning,
+         'min_people_shift2': minPeopleEvening,
+         'min_people_shift3': minPeopleNight,
+         'nr_weekdays': nrWeekdays,
+         'nr_weekenddays': nrWeekendDays,
+         'time_start_shift1': timeShift1,
+         'time_start_shift2': timeShift2,
+         'time_start_shift3': timeShift3,
+      });
+
     return value;
   }
-  Future<int> insertJob() async{
-    int _value = 0;
-    try{
-       _value =await _db.insert(table: 'jobs', insertData: {
-         'lid': ref.read(providerHiveService).getUser().id,
-         'title': ref.read(providerJobsTitle),
-         'nr_shifts_weekdays': ref.read(providerJobsNrShiftsWeekday),
-         'nr_shifts_weekend': ref.read(providerJobsNrShiftsWeekend),
-         'lenght_shifts_weekdays': ref.watch(providerJobsShiftsWeekdayLength),
-         'lenght_shifts_weekend': ref.watch(providerJobsShiftsWeekendLength),
-         'min_people_shift1': ref.watch(providerJobsMinPeopleMorning),
-         'min_people_shift2': ref.watch(providerJobsMinPeopleEvening),
-         'min_people_shift3': ref.watch(providerJobsMinPeopleNight),
-         'nr_weekdays': ref.watch(providerJobsNrWeekdays),
-         'nr_weekenddays': ref.watch(providerJobsNrWeekends),
-      });
-    }catch(error){
-      print('Got error on insert job:${error.toString()}');
-      return -1;
-    }
-    return _value;
-  }
   Future<List> adminGetAllLocation() async{
-    List _loc = await _db.getAll(table: 'users',
+    List loc = await _db.getAll(table: 'users',
     fields: 'uid,email,name,password',
       where: 'role = \'location\''
     );
 
-    return _loc;
+    return loc;
   }
   Future<List> getJobsForLocation(int locId)async{
-    List _jobs= await _db.getAll(table: 'jobs',
+    List jobs= await _db.getAll(table: 'jobs',
     where: {
       'lid' : ['=',locId],
     });
-    return _jobs;
+    return jobs;
   }
   Future<List> getEmployeesForLocation(int locId)async{
-    List _emp= await _db.getAll(table: 'employees',
+    List emp= await _db.getAll(table: 'employees',
     where: {
       'lid' : ['=',locId],
     }
     );
-    return _emp;
+    return emp;
   }
 
   Future<int> updatePass(String password, int id) async {
@@ -131,6 +140,28 @@ class SqlService {
         updateData: {'password' : password, 'status': 'confirmed'},
         where: {'uid' : id} );
     return resp;
+  }
+
+  Future getEmployee(int uid) async {
+    var row1 = await _db.getOne(
+      table: 'employees',
+      fields: '*',
+      where: {
+        'uid': uid,
+      },
+      debug: true,);
+    return row1;
+  }
+
+  Future getJob( int jid) async{
+    var row1 = await _db.getOne(
+      table: 'jobs',
+      fields: '*',
+      where: {
+        'jid': jid,
+      },
+      debug: true,);
+    return row1;
   }
 
 

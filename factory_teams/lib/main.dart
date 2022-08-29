@@ -1,22 +1,18 @@
-import 'package:factory_teams/presentation/admin/admin_page.dart';
-import 'package:factory_teams/presentation/employee/employee_page.dart';
-import 'package:factory_teams/presentation/location/location_page.dart';
-import 'package:factory_teams/providers/auth_providers.dart';
-import 'package:factory_teams/providers/encrypt_providers.dart';
-import 'package:factory_teams/providers/isar_providers.dart';
-import 'package:factory_teams/adapters/database/sql_service.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+import 'package:factory_teams/presentation/welcome_page.dart';
+
+import 'package:factory_teams/providers/service_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:mysql_utils/mysql_utils.dart';
-import 'package:path_provider/path_provider.dart';
 
-import 'presentation/login_page.dart';
+import 'models/user.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: "assets/.env");
+  await dotenv.load(fileName: "assets/.env").then((value) {print("dotenv ok");}).
+  onError((error, stackTrace) {print("dotenv error");}).whenComplete(() {print("dotenv done");});
 
 
   runApp( ProviderScope(
@@ -48,45 +44,61 @@ class AuthChecker extends ConsumerStatefulWidget {
 }
 
 class _AuthCheckerState extends ConsumerState<AuthChecker> {
-  void init(WidgetRef ref) async {
-    final x=await getApplicationSupportDirectory();
-    print('path_var is ${x.path}');
-    ref.read(providerDirectory.notifier).state = x.path;
-    await ref.read(providerIsarService).init();
-    await ref.read(providerHiveService).init();
-    var isUser =  ref.read(providerHiveService).checkUser();
-    if(isUser) {
-      ref.read(providerLogInStatus.notifier)
-        .state = ref.read(providerHiveService).getUser().role;
-    }
 
-  }
   @override
   void initState() {
-    init(ref);
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
 
-    final authState = ref.watch(providerLogInStatus);
-    print(ref.read(providerEncryptionService).decrypt('AsHG5ojjsHW3kkPVQMr+KQ=='));
-    if(authState == ''){
-      return LoginPage();
-    }
-    else
-    {
-      switch(authState){
-        case 'admin':
-          return AdminPage();
-        case 'location':
-          return LocationPage();
-        case 'employee':
-          return EmployeePage();
-      }
-      return Container();
-    }
+   return FutureBuilder(
+      future: ref.read(providerHiveService).init(), // a previously-obtained Future<String> or null
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        Widget child;
+        if (snapshot.hasData) {
+          child = WelcomePage();
 
+        } else if (snapshot.hasError) {
+          child = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 60,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text('Error: ${snapshot.error}'),
+              )
+            ],
+          );
+
+        } else {
+          child = Scaffold(
+            backgroundColor: Colors.deepPurple[200],
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const <Widget>[
+                  SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: CircularProgressIndicator(),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text('Loading...'),
+                  )
+                ],
+              ),
+            ),
+          );
+        }
+        return child;
+      },
+    );
   }
 }
 

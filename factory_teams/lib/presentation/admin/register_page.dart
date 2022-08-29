@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../providers/registration_providers.dart';
+import '../../providers/service_providers.dart';
 
 class RegisterPage extends ConsumerWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -52,8 +53,11 @@ class RegisterPage extends ConsumerWidget {
                       , ref.read(providerRegistrationName), ref.read(providerRegistrationPassword),
                       ref.read(providerRegistrationPasswordConfirm));
                   // ignore: use_build_context_synchronously
-                  if(response.isNotEmpty) showMyDialog(context, "Registration error", response);
-
+                  if(response.isNotEmpty) {
+                    showMyDialog(context, "Registration error", response);
+                  } else {
+                    showMyDialog(context, "Registration Successful", 'Location was added');
+                  }
                 },
                 child: const Text(
                   'Submit',

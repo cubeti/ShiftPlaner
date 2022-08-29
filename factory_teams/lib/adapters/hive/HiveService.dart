@@ -12,17 +12,22 @@ class HiveService {
   HiveService(Ref ref){
     _ref = ref;
   }
-  Future<void> init() async{
-     Hive
-       ..init(_ref.read(providerDirectory))
-       ..registerAdapter(UserAdapter());
+  Future<String> init() async{
+    final x=await getApplicationSupportDirectory();
+    _ref.read(providerDirectory.notifier).state = x.path;
+     Hive.init(_ref.read(providerDirectory));
+     if(!Hive.isAdapterRegistered(1)){
+       Hive.registerAdapter(UserAdapter());
+     }
+
      print("Hive init");
-    userBox = await Hive.openBox<User>('users');
+    userBox = await Hive.openBox<User>('user');
     print("box init");
+    return 'ok';
   }
   Future<void> setUser(User user) async {
-    var box = await Hive.openBox<User>('users');
-    if (await Hive.boxExists('users')){
+    var box = await Hive.openBox<User>('user');
+    if (await Hive.boxExists('user')){
       if ( box.isOpen){
         box.put('user', user);
       }

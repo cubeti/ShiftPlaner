@@ -7,6 +7,8 @@ import 'package:factory_teams/providers/isar_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../providers/auth_providers.dart';
+import '../../providers/service_providers.dart';
+import '../login_page.dart';
 
 class LocationPage extends ConsumerStatefulWidget {
   const LocationPage({
@@ -20,16 +22,10 @@ class _LocationPageState extends ConsumerState<LocationPage> {
 
   List<Job> _jobs= [];
   List<Employee> _emp = [];
+  List<int> peopleReq = [];
   void init()async{
-    if(ref.read(providerHiveService).getUser().status == 'new')
-      {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PasswordChangePage()),
-        );
-      }
-    _jobs = await ref.read(providerIsarService).getJobs(ref.read(providerHiveService).getUser().id);
-    _emp = await ref.read(providerIsarService).getEmployees();
+    await ref.read(providerLocationServices).setJobs(ref.read(providerHiveService).getUser().id);
+    await ref.read(providerLocationServices).setEmployees(ref.read(providerHiveService).getUser().id);
     print(_emp);
     setState(() {
 
@@ -44,12 +40,18 @@ class _LocationPageState extends ConsumerState<LocationPage> {
 
   @override
   Widget build(BuildContext context) {
+    _jobs= ref.read(providerLocationServices).getJobs();
+    _emp=ref.read(providerLocationServices).getEmployees();
+    peopleReq = ref.read(providerLocationServices).getNumberPeople();
     var w=MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: (){ ref.read(providerLogInStatus.notifier).state = '';
+          onPressed: (){
           ref.read(providerHiveService).deleteUser();
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage() ));
           },
           icon: Icon(
             Icons.power_settings_new,
@@ -159,7 +161,7 @@ class _LocationPageState extends ConsumerState<LocationPage> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: NetworkImage(
-                          item.url,
+                          item.url.isEmpty ? 'https://i.picsum.photos/id/62/200/200.jpg?hmac=IdjAu94sGce82DBYTMbOYzXr7kup1tYqdr0bHkRDWUs':item.url,
                         ),
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
@@ -186,7 +188,7 @@ class _LocationPageState extends ConsumerState<LocationPage> {
                 ListTile(
                   title: Text(item.uid.toString()),
                   subtitle: Text(
-                    item.phone.toString(),
+                    item.phone.isEmpty ? "0000000000" : item.phone,
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Icon(
@@ -228,7 +230,11 @@ class _LocationPageState extends ConsumerState<LocationPage> {
                       child: CircleAvatar(
                         backgroundColor: Colors.white,
                         radius: 14.0,
-                        child: Text('3',style: TextStyle(color: Colors.red,fontSize: 24),),
+                        child: Text(peopleReq[index].toString(),
+                          style: TextStyle(
+                            color: peopleReq[index] > 0 ? Colors.green : Colors.red,
+                              fontSize: 24),
+                        ),
                       ),
                     ),
                   ),

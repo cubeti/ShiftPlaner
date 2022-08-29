@@ -1,14 +1,13 @@
 
+import 'package:factory_teams/models/location.dart';
 import 'package:factory_teams/providers/encrypt_providers.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../providers/isar_providers.dart';
-
 import '../providers/regex_providers.dart';
-import '../providers/registration_providers.dart';
+import '../providers/service_providers.dart';
 import '../providers/sql_providers.dart';
 
 class AdminService{
-
+    List<Location> locations = [];
     late Ref providers;
     AdminService(Ref ref){
       providers=ref;
@@ -40,11 +39,9 @@ class AdminService{
         }
       }
       else{
-        providers.read(providerIsarService).insertLoc(val,email,
-            name,
-            password,
-            'location');
-        return 'Register $name Id $val';
+        Location l = Location()..id=val..name=name..email=email..password='pas';
+        locations.add(l);
+        print('Register $name Id $val');
       }
         return '';
     }
@@ -59,5 +56,29 @@ class AdminService{
       providers.read(providerHiveService).updateUserStatus();
       if(result != 1) return "SQL returned $result";
       return '';
+    }
+    Future<String> deleteLocation(int id)async{
+      await providers.read(providerSqlService).delete(id);
+      locations.removeWhere((element) => element.id==id);
+      return '';
+    }
+    Future<void> setLocationsFromDb() async {
+      locations.clear();
+      print("Set locations");
+      List temp=await providers.read(providerSqlService).adminGetAllLocation();
+      for (var element  in temp) {
+        var map = element as Map<String,dynamic>;
+        var location = Location()
+          ..email = map['email']
+          ..id= map['uid']
+          ..name=map['name']
+          ..password='pass';
+        locations.add(location);
+      }
+      print("Set locations done");
+    }
+    List<Location> getLocations(){
+      print('Admin page getLoc');
+      return locations;
     }
 }

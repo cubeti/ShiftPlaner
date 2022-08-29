@@ -1,9 +1,12 @@
 import 'package:factory_teams/models/location.dart';
 import 'package:factory_teams/presentation/admin/register_page.dart';
+import 'package:factory_teams/presentation/login_page.dart';
 import 'package:factory_teams/providers/auth_providers.dart';
 import 'package:factory_teams/providers/isar_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../providers/service_providers.dart';
 
 class AdminPage extends ConsumerStatefulWidget {
 
@@ -18,18 +21,13 @@ class AdminPage extends ConsumerStatefulWidget {
 class _AdminPageState extends ConsumerState<AdminPage> {
   List<Location> locations = [];
   void init()async{
-    await ref.read(providerIsarService).saveLocations(ref);
-    locations = await ref.read(providerIsarService).getAllLocation();
+    print('Admin page init');
+    await ref.read(providerAdminServices).setLocationsFromDb();
     setState(() {
-
+      print('Admin page init done');
     });
   }
-  updateLocations()async{
-   locations = await ref.read(providerIsarService).getAllLocation();
-   setState(() {
 
-   });
-  }
 
   @override
   void initState() {
@@ -38,13 +36,18 @@ class _AdminPageState extends ConsumerState<AdminPage> {
   }
   @override
   Widget build(BuildContext context) {
-    updateLocations();
+    print('Admin page build');
+    locations = ref.read(providerAdminServices).getLocations();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: (){
-            ref.read(providerLogInStatus.notifier).state = '';
+
             ref.read(providerHiveService).deleteUser();
+            Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage() ));
+
             },
           icon: Icon(
             Icons.power_settings_new,
@@ -81,9 +84,8 @@ class _AdminPageState extends ConsumerState<AdminPage> {
                         child: ListTile(
                           trailing: IconButton(
                             onPressed: ()async{
-                              await ref.read(providerIsarService).deleteUser(locations[index].id ?? 0);
+                              await ref.read(providerAdminServices).deleteLocation(locations[index].id);
                               setState(() {
-
                               });
                             },
                             icon: Icon(Icons.delete,color: Colors.red,),

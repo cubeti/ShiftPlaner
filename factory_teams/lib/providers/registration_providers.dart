@@ -5,10 +5,11 @@ final providerRegistrationEmail = StateProvider((ref) => '');
 final providerRegistrationName = StateProvider((ref) => '');
 final providerRegistrationPassword = StateProvider((ref) => '');
 final providerRegistrationRole = StateProvider((ref) => '');
+final providerDropdown=StateProvider((ref) => '');
 final providerRegistrationPasswordConfirm = StateProvider((ref) => '');
 final providerRegistrationWage = StateProvider<double>((ref) => 0.0);
 final providerRegistrationVacationDays = StateProvider<int>((ref) => 0);
-final providerRegistrationPhone = StateProvider<int>((ref) => 0);
+final providerRegistrationPhone = StateProvider<String>((ref) => '');
 final providerRegistrationNorm = StateProvider<int>((ref) => 0);
 final providerRegistrationJob = StateProvider((ref) => '');
 final providerRegistrationUrl = StateProvider((ref) => '');
@@ -25,4 +26,3 @@ final providerJobsTitle = StateProvider<String>((ref) => '');
 final providerJobsNrWeekdays = StateProvider<int>((ref) => 0);
 final providerJobsNrWeekends = StateProvider<int>((ref) => 0);
 
-final providerAdminServices = Provider((ref) => AdminService(ref));

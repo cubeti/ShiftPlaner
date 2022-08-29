@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../providers/registration_providers.dart';
+import '../../providers/service_providers.dart';
 
 class RegisterEmployee extends ConsumerStatefulWidget {
   const RegisterEmployee({
@@ -22,13 +23,14 @@ class RegisterEmployee extends ConsumerStatefulWidget {
 class _RegisterEmployeeState extends ConsumerState<RegisterEmployee> {
 
   String dropdownValue = 'One';
-  List<String> jobtitles=[];
+  List<String> jobTitles=[];
   void init()async{
-    jobtitles=await ref.read(providerIsarService).getAllJobsTitle();
-    dropdownValue = jobtitles.first;
-    ref.read(providerRegistrationRole.notifier).state = dropdownValue;
-    setState(() {
+    jobTitles=ref.read(providerLocationServices).getAllJobsTitle();
 
+
+    setState(() {
+      dropdownValue = jobTitles.first;
+      ref.read(providerRegistrationRole.notifier).state = dropdownValue;
     });
   }
   @override
@@ -47,7 +49,7 @@ class _RegisterEmployeeState extends ConsumerState<RegisterEmployee> {
     ref.read(providerRegistrationVacationDays.notifier).state =int.parse(s);
   }
   void updatePhone(String s,WidgetRef ref){
-    ref.read(providerRegistrationPhone.notifier).state =int.parse(s);
+    ref.read(providerRegistrationPhone.notifier).state =s;
   }
   void updateNorm(String s,WidgetRef ref){
     ref.read(providerRegistrationNorm.notifier).state=int.parse(s);
@@ -85,10 +87,10 @@ class _RegisterEmployeeState extends ConsumerState<RegisterEmployee> {
               children: [
                 Text("Select job title  "),dropButton()
               ],),
-              customTextField('Photo URL',updateUrl,false,TextInputType.url),
+              customTextField('A Photo URL',updateUrl,false,TextInputType.url),
               customTextField('Password',updatePsw1,true,TextInputType.text),
-              customTextField('Vacation Days',updateVacation,false,TextInputType.number),
-              customTextField('Pay/month',updateWage,false,TextInputType.number),
+              customTextField('Vacation days per year',updateVacation,false,TextInputType.number),
+              customTextField('Pay/hour',updateWage,false,TextInputType.number),
               customTextField('Norm hours',updateNorm,false,TextInputType.number),
               Container(
                 height: 50,
@@ -106,10 +108,11 @@ class _RegisterEmployeeState extends ConsumerState<RegisterEmployee> {
                       print('This is not inserting');
                       return;
                     }
-                    ref.watch(providerInsertEmployee).when(data: (data) {print("ok inserted user");},
-                        error: (er,st) async { await showMyDialog(context, 'Error', er.toString());},
-                        loading: (){});
-                    Navigator.pop(context);
+                    print("Inserting employee");
+                    await ref.read(providerLocationServices).addEmployee();
+
+                    if(mounted) Navigator.pop(context);
+
 
                   },
                   child: const Text('Submit',style: TextStyle(color: Colors.white,fontSize: 25),),
@@ -131,7 +134,7 @@ class _RegisterEmployeeState extends ConsumerState<RegisterEmployee> {
           height: 3,
           color: Colors.deepPurpleAccent,
         ),
-        items: jobtitles .map<DropdownMenuItem<String>>((String val) {
+        items: jobTitles .map<DropdownMenuItem<String>>((String val) {
           return DropdownMenuItem<String>(
             value: val,
             child: Text(val),
@@ -139,7 +142,9 @@ class _RegisterEmployeeState extends ConsumerState<RegisterEmployee> {
         }).toList(),
         onChanged: (String? newVal){
           setState(() {
-            ref.read(providerRegistrationRole.notifier).state = newVal ??dropdownValue;
+            print("newval is $newVal");
+            ref.read(providerDropdown.notifier).state = newVal ??dropdownValue;
+            print("providerDropdown= ${ref.read(providerDropdown)}");
             dropdownValue=newVal ?? dropdownValue;
           });
         }

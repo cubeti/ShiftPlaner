@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/user.dart';
 import '../providers/encrypt_providers.dart';
-import '../providers/isar_providers.dart';
+import '../providers/service_providers.dart';
 
 class UserServices {
 
@@ -14,21 +14,21 @@ class UserServices {
     ref = providers;
   }
 
-  Future<void> logIn(String email, String password) async {
-    print("loging in");
+  Future<String> logIn(String email, String password) async {
+    print("loging in $password");
     print(ref.read(providerEncryptionService).encrypt(password));
     User? user = await ref.read(providerSqlService).getUser(email: email);
     if (user == null) {
-      print("User not found");
-      return;
+      return "User not found";
     }
-    if (user.password ==
+    if (user.password !=
         ref.read(providerEncryptionService).encrypt(password)) {
-      print("Correct user");
-      ref.read(providerLogInStatus.notifier).state = user.role;
-      await ref.read(providerHiveService).setUser(user);
-      return;
+      return "Wrong credentials";
     }
+      print("Correct user");
+      await ref.read(providerHiveService).setUser(user);
+      return '';
+
   }
   
 }
