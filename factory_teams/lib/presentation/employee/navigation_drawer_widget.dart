@@ -1,3 +1,4 @@
+import 'package:factory_teams/presentation/employee/preferences_page.dart';
 import 'package:factory_teams/providers/service_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -133,9 +134,9 @@ class NavigationDrawerWidget extends ConsumerWidget {
         // ));
         break;
       case 1:
-        // Navigator.of(context).push(MaterialPageRoute(
-        //   builder: (context) => FavouritesPage(),
-        // ));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => PreferencePage(),
+        ));
         break;
       case 2:
       // Navigator.of(context).push(MaterialPageRoute(

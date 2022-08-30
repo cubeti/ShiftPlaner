@@ -18,4 +18,9 @@ class Employee{
   late int nrVacationDays;
   late int norm;
   late String name;
+
+  @override
+  String toString() {
+    return 'Employee{eid: $eid, lid: $lid, uid: $uid, url: $url, phone: $phone, jid: $jid, salary: $salary, nrVacationDays: $nrVacationDays, norm: $norm, name: $name}';
+  }
 }

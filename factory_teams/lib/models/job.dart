@@ -17,4 +17,9 @@ class Job{
   late int timeShift1;
   late int timeShift2;
   late int timeShift3;
+
+  @override
+  String toString() {
+    return 'Job{jid: $jid, Title: $Title, lid: $lid, nrShiftsWeekday: $nrShiftsWeekday, nrShiftsWeekdend: $nrShiftsWeekdend, lengthShiftsWeekday: $lengthShiftsWeekday, lengthShiftsWeekend: $lengthShiftsWeekend, minPeopleShift1: $minPeopleShift1, minPeopleShift2: $minPeopleShift2, minPeopleShift3: $minPeopleShift3, nrWeekdays: $nrWeekdays, nrWeekends: $nrWeekends, timeShift1: $timeShift1, timeShift2: $timeShift2, timeShift3: $timeShift3}';
+  }
 }

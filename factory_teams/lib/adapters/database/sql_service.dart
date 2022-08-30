@@ -163,6 +163,38 @@ class SqlService {
       debug: true,);
     return row1;
   }
+  Future getCurrentDate() async{
+    var row1 = await _db.query('Select * from calendar where curdate() > start_date and curdate() < end_date');
+    return row1.rows.first;
+  }
+
+  Future<int> addPreference(int week1, int week2, int week3, int week4, int weekend1, int weekend2, int weekend3, int weekend4, int cid, int uid, int jid) async {
+    return await _db.insert(table: 'preferences', insertData: {
+      'uid': uid,
+      'jid': jid,
+      'week1': week1,
+      'week2': week2,
+      'week3': week3,
+      'week4': week4,
+      'weekend1': weekend1,
+      'weekend2': weekend2,
+      'weekend3': weekend3,
+      'weekend4': weekend4,
+      'cid': cid,
+    });
+  }
+
+  Future getpref(int uid, int cid) async {
+    var row1 = await _db.getOne(
+    table: 'preferences',
+    fields: '*',
+    order: 'pid desc',
+    where: {
+      'uid': uid,
+      'cid': cid,
+    },
+    debug: true,);
+  return row1;}
 
 
 }
