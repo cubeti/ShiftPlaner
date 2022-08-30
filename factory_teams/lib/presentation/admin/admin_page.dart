@@ -2,7 +2,6 @@ import 'package:factory_teams/models/location.dart';
 import 'package:factory_teams/presentation/admin/register_page.dart';
 import 'package:factory_teams/presentation/login_page.dart';
 import 'package:factory_teams/providers/auth_providers.dart';
-import 'package:factory_teams/providers/isar_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

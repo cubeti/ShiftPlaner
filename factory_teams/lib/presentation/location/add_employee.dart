@@ -1,7 +1,6 @@
 
 
 import 'package:factory_teams/providers/auth_providers.dart';
-import 'package:factory_teams/providers/isar_providers.dart';
 import 'package:factory_teams/providers/regex_providers.dart';
 import 'package:factory_teams/providers/sql_providers.dart';
 import 'package:factory_teams/services/widgets.dart';

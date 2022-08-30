@@ -3,9 +3,9 @@ import 'package:factory_teams/models/job.dart';
 import 'package:factory_teams/presentation/change_password_page.dart';
 import 'package:factory_teams/presentation/location/add_employee.dart';
 import 'package:factory_teams/presentation/location/add_job.dart';
-import 'package:factory_teams/providers/isar_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../models/request.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/service_providers.dart';
 import '../login_page.dart';
@@ -23,9 +23,11 @@ class _LocationPageState extends ConsumerState<LocationPage> {
   List<Job> _jobs= [];
   List<Employee> _emp = [];
   List<int> peopleReq = [];
+  List<Request> requests = [];
   void init()async{
     await ref.read(providerLocationServices).setJobs(ref.read(providerHiveService).getUser().id);
     await ref.read(providerLocationServices).setEmployees(ref.read(providerHiveService).getUser().id);
+    await ref.read(providerLocationServices).setRequests();
     print(_emp);
     setState(() {
 
@@ -43,6 +45,8 @@ class _LocationPageState extends ConsumerState<LocationPage> {
     _jobs= ref.read(providerLocationServices).getJobs();
     _emp=ref.read(providerLocationServices).getEmployees();
     peopleReq = ref.read(providerLocationServices).getNumberPeople();
+    requests = ref.read(providerLocationServices).getRequests();
+
     var w=MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
@@ -130,12 +134,13 @@ class _LocationPageState extends ConsumerState<LocationPage> {
             child: ListView(
               children: [
                 _jobsTitle(),
-                _empList()
+                _empList(),
+                CustomListView(requests,ref)
                 //_EmployeeListView(),
                 //_requestsListView(),
               ],
             ),
-          )
+          ),
         ],
       )
 
@@ -186,7 +191,7 @@ class _LocationPageState extends ConsumerState<LocationPage> {
                   ),
                 ),
                 ListTile(
-                  title: Text(item.uid.toString()),
+                  title: Text(item.name.toString()),
                   subtitle: Text(
                     item.phone.isEmpty ? "0000000000" : item.phone,
                     overflow: TextOverflow.ellipsis,
@@ -251,6 +256,70 @@ class _LocationPageState extends ConsumerState<LocationPage> {
           );
         },
       ),
+    );
+  }
+
+}
+
+
+class CustomListView extends StatefulWidget {
+
+  CustomListView(this.requests,this.ref, {Key? key}) : super(key: key);
+  final List<Request> requests;
+  WidgetRef ref;
+
+  @override
+  State<CustomListView> createState() => _CustomListViewState();
+}
+
+class _CustomListViewState extends State<CustomListView> {
+  final Map<String, Color> colors = {
+    'new': Colors.yellow,
+    'ok': Colors.green,
+    'notok': Colors.red,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 100,
+      child: ListView.builder(
+          itemExtent: 300.0,
+          scrollDirection: Axis.horizontal,
+          itemCount: widget.requests.length,
+          itemBuilder: (context, index) {
+            return Container(
+              width: 200,
+              child: Card(
+                color: colors[widget.requests[index].status],
+                child: ListTile(
+                  leading: IconButton(
+                    icon: Icon(Icons.check),
+                    onPressed: (){
+                      widget.ref.read(providerLocationServices).updateRequest(index,widget.requests[index].rid,'ok');
+
+                      setState(() {
+                        widget.requests[index].status='ok';
+                      });
+
+                      },
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(Icons.dangerous),
+                    onPressed: (){
+                      widget.ref.read(providerLocationServices).updateRequest(index,widget.requests[index].rid,'notok');
+                     setState(() {
+                       widget.requests[index].status='notok';
+                     });
+
+                      },
+                  ),
+                  title: Text('${widget.requests[index].uid}:${widget.requests[index].startDate}'),
+                  subtitle: Text(widget.requests[index].endDate),
+                ),
+              ),
+            );
+          }),
     );
   }
 }

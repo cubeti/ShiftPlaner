@@ -1,7 +1,6 @@
 
 
 import 'package:factory_teams/models/user.dart';
-import 'package:factory_teams/providers/isar_providers.dart';
 import 'package:hive/hive.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,8 +13,7 @@ class HiveService {
   }
   Future<String> init() async{
     final x=await getApplicationSupportDirectory();
-    _ref.read(providerDirectory.notifier).state = x.path;
-     Hive.init(_ref.read(providerDirectory));
+     Hive.init(x.path);
      if(!Hive.isAdapterRegistered(1)){
        Hive.registerAdapter(UserAdapter());
      }

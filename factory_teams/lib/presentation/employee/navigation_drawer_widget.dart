@@ -1,4 +1,5 @@
 import 'package:factory_teams/presentation/employee/preferences_page.dart';
+import 'package:factory_teams/presentation/employee/requests_page.dart';
 import 'package:factory_teams/providers/service_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -134,14 +135,14 @@ class NavigationDrawerWidget extends ConsumerWidget {
         // ));
         break;
       case 1:
-        Navigator.of(context).push(MaterialPageRoute(
+        Navigator.push(context,MaterialPageRoute(
           builder: (context) => PreferencePage(),
         ));
         break;
       case 2:
-      // Navigator.of(context).push(MaterialPageRoute(
-      //   builder: (context) => FavouritesPage(),
-      // ));
+      Navigator.push(context,MaterialPageRoute(
+        builder: (context) => RequestPage(),
+      ));
         break;
       case 3:{ //log out
         ref.read(providerHiveService).deleteUser();

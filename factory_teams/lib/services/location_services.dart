@@ -2,12 +2,14 @@ import 'package:factory_teams/models/employee.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/job.dart';
+import '../models/request.dart';
 import '../providers/registration_providers.dart';
 import '../providers/service_providers.dart';
 import '../providers/sql_providers.dart';
 
 class LocationService{
   List<Employee> employees = [];
+  List<Request> requests = [];
   List<Job> jobs = [];
   late Ref ref ;
   LocationService(Ref reference){
@@ -133,5 +135,31 @@ class LocationService{
     ..timeShift3= timeShift3;
     jobs.add(job);
     return jid;
-}
+  }
+  List<Request> getRequests(){
+    return requests;
+  }
+  Future setRequests() async {
+    requests = [];
+   var req = await ref.read(providerSqlService).getrequestsLocation(ref.read(providerHiveService).getUser().id);
+    for (var element  in req) {
+      var map = element as Map<String, dynamic>;
+      var tmp = Request()
+        ..rid = map['rid']
+        ..uid = map['uid']
+        ..jid = map['jid']
+        ..lid = map['lid']
+        ..status = map['status']
+        ..startDate = map['startdate']
+        ..endDate = map['enddate'];
+      requests.add(tmp);
+    }
+    requests.toString();
+    return;
+  }
+
+  void updateRequest(int index,int rid, String s) {
+    ref.read(providerSqlService).updateRequest(rid,s);
+    requests[index].status=s;
+  }
 }

@@ -11,7 +11,6 @@ import 'package:mysql_utils/mysql_utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/job.dart';
-import '../../providers/isar_providers.dart';
 import '../../providers/service_providers.dart';
 
 class SqlService {
@@ -126,9 +125,11 @@ class SqlService {
     return jobs;
   }
   Future<List> getEmployeesForLocation(int locId)async{
-    List emp= await _db.getAll(table: 'employees',
+    List emp= await _db.getAll(table: 'employees tb1,users tb2',
+    fields: 'tb1.*,tb2.name',
     where: {
-      'lid' : ['=',locId],
+      'tb1.lid' : ['=',locId],
+      'tb1.uid' : ['=','tb2.uid']
     }
     );
     return emp;
@@ -196,5 +197,33 @@ class SqlService {
     debug: true,);
   return row1;}
 
+  Future addRequest( String reqDate1,  String reqDate2,String status ,int lid, int jid, int uid) async {
+
+  return await _db.insert(table: 'requests', insertData: {
+  'uid': uid,
+  'jid': jid,
+  'startdate': reqDate1,
+  'enddate': reqDate2,
+  'status': status,
+  'lid': lid,
+  });
+
+  }
+  Future getrequestsEmploye(int uid) async {
+    return await  _db.getAll(table: 'requests',
+        where: {
+          'uid' : ['=',uid],
+        });
+  }
+  Future getrequestsLocation(int lid) async {
+    return await  _db.getAll(table: 'requests',
+        where: {
+          'lid' : ['=',lid],
+        });
+  }
+
+  void updateRequest(int rid, String s) {
+    _db.update(table: 'requests', updateData: {'status':s}, where: {'rid':rid});
+  }
 
 }

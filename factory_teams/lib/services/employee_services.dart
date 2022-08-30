@@ -6,9 +6,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../models/calendar.dart';
 import '../models/employee.dart';
 import '../models/job.dart';
+import '../models/request.dart';
 import '../models/user.dart';
 
 class EmployeeService{
+  late List<Request> requests = [];
   late Preference preference;
   late Calendar cal;
   late User user;
@@ -16,6 +18,7 @@ class EmployeeService{
   late Employee emp;
   late Job job;
   EmployeeService(Ref reference){
+    requests = [];
     ref= reference;
   }
   Future<void> setData() async {
@@ -79,6 +82,20 @@ class EmployeeService{
     }
     print(preference.toString());
 
+    var req = await ref.read(providerSqlService).getrequestsEmploye(emp.uid);
+    for (var element  in req) {
+      var map = element as Map<String, dynamic>;
+      var tmp = Request()
+        ..rid = map['rid']
+        ..uid = map['uid']
+        ..jid = map['jid']
+        ..lid = map['lid']
+        ..status = map['status']
+        ..startDate = map['startdate']
+        ..endDate = map['enddate'];
+      requests.add(tmp);
+    }
+
   }
 
   Future addPreference(int week1, int week2, int week3, int week4 ,
@@ -105,5 +122,23 @@ class EmployeeService{
 
   Preference getPreference() {
     return preference;
+  }
+  List<Request> getRequests(){
+    return requests;
+  }
+
+  Future addRequest(String reqDate1,String reqDate2) async {
+    int val= await ref.read(providerSqlService).addRequest( reqDate1,  reqDate2,'new' ,emp.lid,emp.jid,emp.uid);
+
+    if(val > 0) {
+      requests.add(
+          Request()..uid=emp.uid..jid=emp.jid..lid=emp.lid
+            ..rid=val..startDate=reqDate1..endDate=reqDate2..status='new');
+    }
+    else {
+      print("Error add request");
+    }
+    return val;
+
   }
 }

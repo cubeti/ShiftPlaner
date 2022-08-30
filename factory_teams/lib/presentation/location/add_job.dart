@@ -1,4 +1,3 @@
-import 'package:factory_teams/providers/isar_providers.dart';
 import 'package:factory_teams/providers/service_providers.dart';
 import 'package:factory_teams/providers/sql_providers.dart';
 import 'package:factory_teams/services/widgets.dart';
