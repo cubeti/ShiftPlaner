@@ -226,4 +226,18 @@ class SqlService {
     _db.update(table: 'requests', updateData: {'status':s}, where: {'rid':rid});
   }
 
+  getprefLocation(int lid, int cid) async {
+
+    List pref= await _db.getAll(table: 'preferences tb1,employees tb2',
+        fields: 'tb1.*',
+        where: {
+          'tb1.cid' : ['=',cid],
+          'tb1.uid' : ['=','tb2.uid'],
+          'tb2.lid' : ['=',lid]
+        }
+    );
+    return pref;
+
+  }
+
 }

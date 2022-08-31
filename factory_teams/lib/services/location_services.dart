@@ -1,4 +1,6 @@
+import 'package:factory_teams/models/calendar.dart';
 import 'package:factory_teams/models/employee.dart';
+import 'package:factory_teams/models/preference.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/job.dart';
@@ -11,6 +13,8 @@ class LocationService{
   List<Employee> employees = [];
   List<Request> requests = [];
   List<Job> jobs = [];
+  List<Preference> prefs = [];
+  Calendar calendar = Calendar();
   late Ref ref ;
   LocationService(Ref reference){
     ref= reference;
@@ -54,6 +58,9 @@ class LocationService{
     return jobs;
   }
   Future<void> setJobs(int id)async {
+
+    await setCalendar();
+    await getPreferencesLocation(calendar.cid);
     jobs.clear();
     List sql = await ref.read(providerSqlService).getJobsForLocation(id);
     int lid = ref.read(providerHiveService).getUser().id;
@@ -157,9 +164,46 @@ class LocationService{
     requests.toString();
     return;
   }
-
+  Future setCalendar() async {
+    var x = await ref.read(providerSqlService).getCurrentDate();
+    print(x.toString());
+    x = x as Map<String , dynamic >;
+    calendar = Calendar()..cid=x['cid']..endDate=x['end_date']..startDate=x['start_date'];
+    return;
+  }
   void updateRequest(int index,int rid, String s) {
     ref.read(providerSqlService).updateRequest(rid,s);
     requests[index].status=s;
+  }
+  Future getPreferencesLocation(int cid) async {
+    List<Preference> list = [];
+    var req = await ref.read(providerSqlService).getprefLocation(
+        ref.read(providerHiveService).getUser().id,
+        cid);
+    for (var element  in req) {
+      var map = element as Map<String, dynamic>;
+      var tmp = Preference()
+        ..pid = map['pid']
+        ..uid = map['uid']
+        ..jid = map['jid']
+        ..cid = map['cid']
+        ..week1 = map['week1']
+        ..week2 = map['week2']
+        ..week3 = map['week3']
+        ..week4 = map['week4']
+        ..weekend1 = map['weekend1']
+        ..weekend2 = map['weekend2']
+        ..weekend3 = map['weekend3']
+        ..weekend4 = map['weekend4'];
+      list.add(tmp);
+    }
+     prefs = list;
+    return;
+  }
+   generateSchedule(int cid,int jid) {
+   List<Preference> preferences =  prefs.where((element) => element.jid == jid).toList();
+   Map<int,Preference> prefMap = {for (Preference x in preferences) x.uid : x };
+   List<Employee> y = employees.where((element) => element.jid == jid).toList();
+   Map<int,Employee> empMap= {for (Employee elem in y) elem.uid : elem };
   }
 }

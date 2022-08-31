@@ -43,7 +43,7 @@ class _AdminPageState extends ConsumerState<AdminPage> {
           onPressed: (){
 
             ref.read(providerHiveService).deleteUser();
-            Navigator.push(
+            Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => LoginPage() ));
 
