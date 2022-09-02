@@ -1,6 +1,7 @@
 import 'package:factory_teams/models/calendar.dart';
 import 'package:factory_teams/models/employee.dart';
 import 'package:factory_teams/models/preference.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/job.dart';
@@ -200,10 +201,69 @@ class LocationService{
      prefs = list;
     return;
   }
-   generateSchedule(int cid,int jid) {
-   List<Preference> preferences =  prefs.where((element) => element.jid == jid).toList();
+  Widget generateSchedule(int cid,Job job) {
+    Widget base = Container(child: Text("init"),);
+   List<Preference> preferences =  prefs.where((element) => element.jid == job.jid).toList();
    Map<int,Preference> prefMap = {for (Preference x in preferences) x.uid : x };
-   List<Employee> y = employees.where((element) => element.jid == jid).toList();
+   List<Employee> y = employees.where((element) => element.jid == job.jid).toList();
    Map<int,Employee> empMap= {for (Employee elem in y) elem.uid : elem };
+   List<List<Employee>> week1Schedule = [[]];
+   List<List<Employee>> week2Schedule = [[]];
+   List<List<Employee>> week3Schedule = [[]];
+   List<List<Employee>> week4Schedule = [[]];
+
+   if((job.minPeopleShift1+job.minPeopleShift2+job.minPeopleShift3) > y.length){
+     return Container(child: Text("Not enough people for the job"),);
+
+   }
+
+   if(job.nrWeekends == 0 && job.nrWeekdays == 5){ //regular job
+        List<int> week1 = [ 0,0,0,0];
+        List<int> week2 = [ 0,0,0,0];
+        List<int> week3 = [ 0,0,0,0];
+        List<int> week4 = [ 0,0,0,0];
+        for (Preference pref in prefMap.values) {
+            week1[pref.week1]=week1[pref.week1]+1;
+            week2[pref.week2]=week2[pref.week2]+1;
+            week3[pref.week3]=week3[pref.week3]+1;
+            week4[pref.week4]=week4[pref.week4]+1;
+        }
+        if(week1[1] >= job.minPeopleShift1 && week1[2] >= job.minPeopleShift2 && week1[3] >= job.minPeopleShift3)
+          {
+            // Everyone can have the shift they prefer week1
+            prefMap.forEach((key, value) {
+              week1Schedule[value.week1].add(empMap[key] ?? Employee());
+            });
+          }
+        else{
+
+        }
+        if(week2[1] >= job.minPeopleShift1 && week2[2] >= job.minPeopleShift2 && week2[3] >= job.minPeopleShift3)
+        {
+          // Everyone can have the shift they prefer week2
+          prefMap.forEach((key, value) {
+            week2Schedule[value.week2].add(empMap[key] ?? Employee());
+          });
+        }
+        if(week3[1] >= job.minPeopleShift1 && week3[2] >= job.minPeopleShift2 && week3[3] >= job.minPeopleShift3)
+        {
+          // Everyone can have the shift they prefer week3
+          prefMap.forEach((key, value) {
+            week3Schedule[value.week3].add(empMap[key] ?? Employee());
+          });
+        }
+        if(week4[1] >= job.minPeopleShift1 && week4[2] >= job.minPeopleShift2 && week4[3] >= job.minPeopleShift3)
+        {
+          // Everyone can have the shift they prefer week4
+          prefMap.forEach((key, value) {
+            week4Schedule[value.week4].add(empMap[key] ?? Employee());
+          });
+        }
+
+
+
+   }
+
+   return base;
   }
 }

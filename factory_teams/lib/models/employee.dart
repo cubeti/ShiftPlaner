@@ -4,20 +4,20 @@ import 'package:isar/isar.dart';
 
 class Employee{
 
-  late int eid;
+  late int eid = 0;
 
 
-  late int lid; //link to location
-  late int uid;
+  late int lid = 0; //link to location
+  late int uid =0;
 
-  late String url;
-  late String phone;
-  late int jid; // link to job
+  late String url = '';
+  late String phone = '';
+  late int jid = 0; // link to job
 
-  late double salary; //
-  late int nrVacationDays;
-  late int norm;
-  late String name;
+  late double salary = 0.0; //
+  late int nrVacationDays = 0;
+  late int norm = 0;
+  late String name = '';
 
   @override
   String toString() {
